@@ -1,4 +1,4 @@
-FROM debian:jessie
+FROM python:3-buster
 
 MAINTAINER Jookies LTD <jasmin@jookies.net>
 
@@ -9,9 +9,6 @@ ENV JASMIN_VERSION 0.9.32
 
 # Install requirements
 RUN apt-get update && apt-get install -y \
-    python2.7 \
-    python-pip \
-    python-dev \
     libffi-dev \
     libssl-dev \
     rabbitmq-server \
@@ -25,8 +22,15 @@ RUN mkdir -p /etc/jasmin/resource \
     /etc/jasmin/store \
     /var/log/jasmin \
   && chown jasmin:jasmin /etc/jasmin/store \
-    /var/log/jasmin \
-  && pip install --pre jasmin=="$JASMIN_VERSION"
+    /var/log/jasmin 
+
+WORKDIR /build
+
+COPY . .
+
+RUN pip install .
+
+WORKDIR /usr/jasmin
 
 # Change binding host for jcli
 RUN sed -i '/\[jcli\]/a bind=0.0.0.0' /etc/jasmin/jasmin.cfg
@@ -34,7 +38,7 @@ RUN sed -i '/\[jcli\]/a bind=0.0.0.0' /etc/jasmin/jasmin.cfg
 EXPOSE 2775 8990 1401
 VOLUME ["/var/log/jasmin", "/etc/jasmin", "/etc/jasmin/store"]
 
-COPY docker-entrypoint.sh /
+COPY docker/docker-entrypoint.sh /
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["jasmind.py", "--enable-interceptor-client", "--enable-dlr-thrower", "--enable-dlr-lookup", "-u", "jcliadmin", "-p", "jclipwd"]
 # Notes:
