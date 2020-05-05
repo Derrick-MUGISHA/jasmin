@@ -9,9 +9,6 @@ RUN groupadd -r jasmin && useradd -r -g jasmin jasmin
 RUN apt-get update && apt-get install -y \
     libffi-dev \
     libssl-dev \
-    rabbitmq-server \
-    redis-server \
-    supervisor \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
@@ -32,8 +29,10 @@ ENV UNICODEMAP_JP unicode-ascii
 
 WORKDIR /usr/jasmin
 
-# Change binding host for jcli
+# Change binding host for jcli, redis, and amqp
 RUN sed -i '/\[jcli\]/a bind=0.0.0.0' /etc/jasmin/jasmin.cfg
+RUN sed -i '/\[redis-client\]/a host=redis' /etc/jasmin/jasmin.cfg
+RUN sed -i '/\[amqp-broker\]/a host=rabbitmq' /etc/jasmin/jasmin.cfg
 
 EXPOSE 2775 8990 1401
 VOLUME ["/var/log/jasmin", "/etc/jasmin", "/etc/jasmin/store"]
