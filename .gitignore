@@ -58,4 +58,6 @@ celerybeat-schedule.db
 *.deb
 *.rpm
 
-.env
+.gitignore
+config.bat
+node_modules
